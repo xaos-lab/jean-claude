@@ -15,6 +15,7 @@ export class FileMonitor implements vscode.Disposable {
   private lastStopMtime = 0;
   private notifyPath: string;
   private stopPath: string;
+  private debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   constructor() {
     const claudeDir = path.join(os.homedir(), ".claude");
@@ -49,14 +50,26 @@ export class FileMonitor implements vscode.Disposable {
     type: "notify" | "stop"
   ): fs.FSWatcher | null {
     try {
-      return fs.watch(filePath, (eventType) => {
-        if (eventType === "change") {
-          this.handleTrigger(filePath, type);
-        }
+      return fs.watch(filePath, () => {
+        this.debouncedTrigger(filePath, type);
       });
     } catch {
       return null;
     }
+  }
+
+  private debouncedTrigger(filePath: string, type: "notify" | "stop"): void {
+    const key = type;
+    const existing = this.debounceTimers.get(key);
+    if (existing) {
+      clearTimeout(existing);
+    }
+    // Small delay to let the write finish before reading
+    const timer = setTimeout(() => {
+      this.debounceTimers.delete(key);
+      this.handleTrigger(filePath, type);
+    }, 150);
+    this.debounceTimers.set(key, timer);
   }
 
   private poll(): void {
@@ -72,7 +85,7 @@ export class FileMonitor implements vscode.Disposable {
       const stats = fs.statSync(filePath);
       const lastMtime = type === "notify" ? this.lastNotifyMtime : this.lastStopMtime;
       if (stats.mtimeMs > lastMtime && lastMtime !== 0) {
-        this.handleTrigger(filePath, type);
+        this.debouncedTrigger(filePath, type);
       }
       if (type === "notify") {
         this.lastNotifyMtime = stats.mtimeMs;
@@ -130,5 +143,9 @@ export class FileMonitor implements vscode.Disposable {
       clearInterval(this.pollInterval);
       this.pollInterval = null;
     }
+    for (const timer of this.debounceTimers.values()) {
+      clearTimeout(timer);
+    }
+    this.debounceTimers.clear();
   }
 }
