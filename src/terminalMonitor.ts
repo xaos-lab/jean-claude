@@ -31,9 +31,18 @@ function matchesQuestionPattern(text: string): boolean {
   return QUESTION_PATTERNS.some((p) => p.test(clean));
 }
 
+function containsVisibleContent(text: string): boolean {
+  const clean = stripAnsi(text);
+  return /\S/.test(clean);
+}
+
+const INACTIVITY_TIMEOUT_MS = 10_000;
+
 export class TerminalMonitor implements vscode.Disposable {
   private disposables: vscode.Disposable[] = [];
   private activeReaders = new Set<AbortController>();
+  private inactivityTimers = new Map<vscode.TerminalShellExecution, ReturnType<typeof setTimeout>>();
+  private inactivityFired = new Set<vscode.TerminalShellExecution>();
 
   constructor() {
     this.disposables.push(
@@ -71,17 +80,51 @@ export class TerminalMonitor implements vscode.Disposable {
     this.watchExecutionOutput(event.execution);
   }
 
+  private resetInactivityTimer(execution: vscode.TerminalShellExecution): void {
+    const existing = this.inactivityTimers.get(execution);
+    if (existing) {
+      clearTimeout(existing);
+    }
+    this.inactivityFired.delete(execution);
+
+    const timer = setTimeout(() => {
+      if (!this.inactivityFired.has(execution)) {
+        this.inactivityFired.add(execution);
+        const config = this.getConfig();
+        if (config.get<boolean>("enabled", false) && config.get<boolean>("onQuestion", true)) {
+          playSound("question");
+        }
+      }
+    }, INACTIVITY_TIMEOUT_MS);
+    this.inactivityTimers.set(execution, timer);
+  }
+
+  private clearInactivityTimer(execution: vscode.TerminalShellExecution): void {
+    const timer = this.inactivityTimers.get(execution);
+    if (timer) {
+      clearTimeout(timer);
+      this.inactivityTimers.delete(execution);
+    }
+    this.inactivityFired.delete(execution);
+  }
+
   private async watchExecutionOutput(
     execution: vscode.TerminalShellExecution
   ): Promise<void> {
     const controller = new AbortController();
     this.activeReaders.add(controller);
 
+    this.resetInactivityTimer(execution);
+
     try {
       const stream = execution.read();
       for await (const data of stream) {
         if (controller.signal.aborted) {
           break;
+        }
+        // Reset inactivity timer on each output chunk
+        if (containsVisibleContent(data)) {
+          this.resetInactivityTimer(execution);
         }
         if (matchesQuestionPattern(data)) {
           playSound("question");
@@ -90,6 +133,7 @@ export class TerminalMonitor implements vscode.Disposable {
     } catch {
       // stream ended or was aborted
     } finally {
+      this.clearInactivityTimer(execution);
       this.activeReaders.delete(controller);
     }
   }
@@ -116,6 +160,11 @@ export class TerminalMonitor implements vscode.Disposable {
       controller.abort();
     }
     this.activeReaders.clear();
+    for (const timer of this.inactivityTimers.values()) {
+      clearTimeout(timer);
+    }
+    this.inactivityTimers.clear();
+    this.inactivityFired.clear();
     for (const d of this.disposables) {
       d.dispose();
     }

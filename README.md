@@ -37,6 +37,30 @@ npm run compile
 npx @vscode/vsce package
 ```
 
+Then install the generated `.vsix` file as described above.
+
+### Install from local folder (without .vsix)
+
+1. Clone and compile:
+   ```bash
+   git clone https://github.com/xaos-lab/jean-claude.git
+   cd jean-claude
+   npm install
+   npm run compile
+   ```
+2. Create a symlink from VS Code extensions directory to the project folder:
+   - **Windows** (run as Administrator):
+     ```cmd
+     mklink /D "%USERPROFILE%\.vscode\extensions\tomasjanu.jean-claude" "C:\path\to\jean-claude"
+     ```
+   - **macOS / Linux**:
+     ```bash
+     ln -s /path/to/jean-claude ~/.vscode/extensions/tomasjanu.jean-claude
+     ```
+3. Restart VS Code
+
+The extension will load directly from the source folder. After making changes, run `npm run compile` and reload VS Code.
+
 ## Authentication Setup
 
 The extension needs access to your Claude.ai account for the usage monitor.
@@ -64,33 +88,64 @@ Set `jeanClaude.notificationSound.enabled` to `true`.
 
 ### 2. Configure Claude Code hooks
 
-Add the following to your `~/.claude/settings.json`:
+Add the following to your `~/.claude/settings.json` (or project-level `.claude/settings.local.json`):
 
 ```json
 {
   "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Permission needed\" > ~/.claude/claude-notify"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
-        "type": "command",
-        "command": "echo \"$CLAUDE_NOTIFICATION\" > ~/.claude/claude-notify"
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Permission needed\" > ~/.claude/claude-notify"
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Claude is waiting\" > ~/.claude/claude-notify"
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "type": "command",
-        "command": "echo \"done\" > ~/.claude/claude-stop"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo done > ~/.claude/claude-stop"
+          }
+        ]
       }
     ]
   }
 }
 ```
 
+> **Note:** `PermissionRequest` is needed for the **VS Code extension** (Claude Code agent). `Notification` with `permission_prompt` matcher works only with **Claude Code CLI** in the terminal. Both are included for full coverage.
+
 ### How it works
 
-The extension uses two detection mechanisms:
+The extension uses three detection mechanisms:
 
 - **Terminal Monitor** - watches for `claude` commands in VS Code terminal via Shell Integration API, reads output in real-time and detects question patterns. Works automatically with Claude Code CLI.
-- **File Monitor** - watches trigger files in `~/.claude/` (`claude-notify`, `claude-stop`). Works with any Claude Code setup when hooks are configured.
+- **File Monitor** - watches trigger files in `~/.claude/` (`claude-notify`, `claude-stop`). Works with Claude Code hooks (`PermissionRequest`, `Notification`, `Stop`).
+- **Hooks** - `PermissionRequest` hook fires when a permission dialog appears in VS Code extension; `Notification` hooks fire for CLI permission prompts and idle state.
 
 ## Extension Settings
 
@@ -137,12 +192,6 @@ npm run compile          # Compile TypeScript
 npm run watch            # Compile with file watching
 npx @vscode/vsce package # Package as .vsix
 ```
-
-### Testing During Development
-
-1. Open the project in VS Code
-2. Press `F5` → a new VS Code window will launch with the extension
-3. Edit code, save, restart debug session (`Ctrl+Shift+F5`)
 
 ## Uninstall
 
