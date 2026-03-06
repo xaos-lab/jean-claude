@@ -105,20 +105,10 @@ Add the following to your `~/.claude/settings.json` (or project-level `.claude/s
     ],
     "Notification": [
       {
-        "matcher": "permission_prompt",
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"Permission needed\" > ~/.claude/claude-notify"
-          }
-        ]
-      },
-      {
-        "matcher": "idle_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo \"Claude is waiting\" > ~/.claude/claude-notify"
+            "command": "echo \"$CLAUDE_NOTIFICATION\" > ~/.claude/claude-notify"
           }
         ]
       }
@@ -137,7 +127,7 @@ Add the following to your `~/.claude/settings.json` (or project-level `.claude/s
 }
 ```
 
-> **Note:** `PermissionRequest` is needed for the **VS Code extension** (Claude Code agent). `Notification` with `permission_prompt` matcher works only with **Claude Code CLI** in the terminal. Both are included for full coverage.
+> **Note:** `PermissionRequest` is needed for the **VS Code extension** (Claude Code agent). `Notification` covers all CLI notifications (permission prompts, idle state, etc.). Both are included for full coverage.
 
 ### How it works
 
