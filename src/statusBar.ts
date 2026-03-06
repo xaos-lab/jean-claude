@@ -9,8 +9,8 @@ export class StatusBarManager {
       vscode.StatusBarAlignment.Right,
       50
     );
-    this.item.command = "claudeUsage.refresh";
-    this.item.name = "Claude Usage";
+    this.item.command = "jeanClaude.refresh";
+    this.item.name = "Jean Claude";
     this.showLoading();
     this.item.show();
   }
@@ -49,7 +49,7 @@ export class StatusBarManager {
     }
 
     // Detailed tooltip
-    const lines: string[] = ["Claude Usage Limits", ""];
+    const lines: string[] = ["Jean Claude", ""];
     lines.push(formatBucket("Current session (5h)", data.five_hour));
     lines.push(formatBucket("Weekly - All models", data.seven_day));
 

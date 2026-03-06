@@ -99,7 +99,7 @@ export class FileMonitor implements vscode.Disposable {
 
   private handleTrigger(filePath: string, type: "notify" | "stop"): void {
     const config = vscode.workspace.getConfiguration(
-      "claudeUsage.notificationSound"
+      "jeanClaude.notificationSound"
     );
     if (!config.get<boolean>("enabled", false)) {
       return;

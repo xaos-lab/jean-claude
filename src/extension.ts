@@ -10,7 +10,7 @@ let fileMonitor: FileMonitor;
 let timer: ReturnType<typeof setInterval> | undefined;
 
 async function refresh(): Promise<void> {
-  const config = vscode.workspace.getConfiguration("claudeUsage");
+  const config = vscode.workspace.getConfiguration("jeanClaude");
   const authMethod = config.get<string>("authMethod", "auto");
   const sessionKey = config.get<string>("sessionKey", "");
 
@@ -25,7 +25,7 @@ async function refresh(): Promise<void> {
 
 function startPolling(): void {
   stopPolling();
-  const config = vscode.workspace.getConfiguration("claudeUsage");
+  const config = vscode.workspace.getConfiguration("jeanClaude");
   const intervalMin = config.get<number>("refreshInterval", 5);
   timer = setInterval(refresh, intervalMin * 60 * 1000);
 }
@@ -49,14 +49,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Register commands
   context.subscriptions.push(
-    vscode.commands.registerCommand("claudeUsage.refresh", async () => {
+    vscode.commands.registerCommand("jeanClaude.refresh", async () => {
       statusBar.showLoading();
       await refresh();
     })
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("claudeUsage.setSessionKey", async () => {
+    vscode.commands.registerCommand("jeanClaude.setSessionKey", async () => {
       const key = await vscode.window.showInputBox({
         prompt: "Enter your claude.ai sessionKey cookie",
         placeHolder: "sk-ant-sid01-...",
@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext): void {
         ignoreFocusOut: true,
       });
       if (key !== undefined) {
-        const config = vscode.workspace.getConfiguration("claudeUsage");
+        const config = vscode.workspace.getConfiguration("jeanClaude");
         await config.update("sessionKey", key, vscode.ConfigurationTarget.Global);
         if (config.get<string>("authMethod") === "auto") {
           await config.update("authMethod", "cookie", vscode.ConfigurationTarget.Global);
@@ -78,7 +78,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // React to config changes
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("claudeUsage")) {
+      if (e.affectsConfiguration("jeanClaude")) {
         startPolling();
         refresh();
       }

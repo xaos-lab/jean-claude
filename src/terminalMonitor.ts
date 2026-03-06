@@ -50,7 +50,7 @@ export class TerminalMonitor implements vscode.Disposable {
   }
 
   private getConfig() {
-    return vscode.workspace.getConfiguration("claudeUsage.notificationSound");
+    return vscode.workspace.getConfiguration("jeanClaude.notificationSound");
   }
 
   private onCommandStart(event: vscode.TerminalShellExecutionStartEvent): void {

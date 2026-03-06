@@ -1,6 +1,6 @@
 {
-  "name": "claude-usage-limits",
-  "displayName": "Claude Usage Limits",
+  "name": "jean-claude",
+  "displayName": "Jean Claude",
   "description": "Shows Claude.ai usage limits in the VS Code status bar",
   "version": "0.2.2",
   "author": "Tomas Janu",
@@ -9,7 +9,7 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomasjanu/claude-usage-limits"
+    "url": "https://github.com/xaos-lab/jean-claude"
   },
   "engines": {
     "vscode": "^1.93.0"
@@ -20,18 +20,18 @@
   "contributes": {
     "commands": [
       {
-        "command": "claudeUsage.refresh",
-        "title": "Claude Usage: Refresh"
+        "command": "jeanClaude.refresh",
+        "title": "Jean Claude: Refresh"
       },
       {
-        "command": "claudeUsage.setSessionKey",
-        "title": "Claude Usage: Set Session Key"
+        "command": "jeanClaude.setSessionKey",
+        "title": "Jean Claude: Set Session Key"
       }
     ],
     "configuration": {
-      "title": "Claude Usage Limits",
+      "title": "Jean Claude",
       "properties": {
-        "claudeUsage.authMethod": {
+        "jeanClaude.authMethod": {
           "type": "string",
           "default": "auto",
           "enum": ["auto", "cookie"],
@@ -41,29 +41,29 @@
           ],
           "description": "Authentication method for fetching usage data"
         },
-        "claudeUsage.sessionKey": {
+        "jeanClaude.sessionKey": {
           "type": "string",
           "default": "",
           "description": "Session key cookie from claude.ai (required if authMethod is 'cookie')"
         },
-        "claudeUsage.refreshInterval": {
+        "jeanClaude.refreshInterval": {
           "type": "number",
           "default": 5,
           "minimum": 1,
           "maximum": 60,
           "description": "Refresh interval in minutes"
         },
-        "claudeUsage.notificationSound.enabled": {
+        "jeanClaude.notificationSound.enabled": {
           "type": "boolean",
           "default": false,
           "description": "Play a sound when Claude Code asks a question or finishes a task in the terminal"
         },
-        "claudeUsage.notificationSound.onQuestion": {
+        "jeanClaude.notificationSound.onQuestion": {
           "type": "boolean",
           "default": true,
           "description": "Play a sound when Claude Code asks for user input (e.g. tool approval)"
         },
-        "claudeUsage.notificationSound.onTaskComplete": {
+        "jeanClaude.notificationSound.onTaskComplete": {
           "type": "boolean",
           "default": true,
           "description": "Play a sound when Claude Code finishes a task (command exits)"

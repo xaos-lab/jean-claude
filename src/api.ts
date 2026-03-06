@@ -132,7 +132,7 @@ export async function fetchUsage(
   // Explicit cookie method
   if (!sessionKey) {
     throw new Error(
-      "Session key not configured. Set it via 'Claude Usage: Set Session Key' command."
+      "Session key not configured. Set it via 'Jean Claude: Set Session Key' command."
     );
   }
   return await fetchUsageWeb(sessionKey);

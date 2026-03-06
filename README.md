@@ -1,4 +1,4 @@
-# Claude Usage Limits - VS Code Extension
+# Jean Claude - VS Code Extension
 
 Displays your current Claude.ai usage limits directly in the VS Code status bar and plays notification sounds when Claude Code needs your attention.
 
@@ -21,7 +21,7 @@ Displays your current Claude.ai usage limits directly in the VS Code status bar 
 
 ### From .vsix file
 
-1. Download the `claude-usage-limits-0.2.0.vsix` file
+1. Download the `.vsix` file from [Releases](https://github.com/xaos-lab/jean-claude/releases)
 2. Open VS Code
 3. `Ctrl+Shift+X` (Extensions) → click `...` in the top right → **"Install from VSIX..."**
 4. Select the downloaded `.vsix` file
@@ -30,8 +30,8 @@ Displays your current Claude.ai usage limits directly in the VS Code status bar 
 ### From source
 
 ```bash
-git clone https://github.com/tomasjanu/claude-usage-limits.git
-cd claude-usage-limits
+git clone https://github.com/xaos-lab/jean-claude.git
+cd jean-claude
 npm install
 npm run compile
 npx @vscode/vsce package
@@ -52,7 +52,7 @@ If automatic detection doesn't work:
 1. Open https://claude.ai and log in
 2. Open DevTools (`F12`) → **Application** → **Cookies** → `https://claude.ai`
 3. Copy the `sessionKey` cookie value (starts with `sk-ant-sid01-...`)
-4. In VS Code: `Ctrl+Shift+P` → **"Claude Usage: Set Session Key"** → paste
+4. In VS Code: `Ctrl+Shift+P` → **"Jean Claude: Set Session Key"** → paste
 
 > **Note:** The session cookie expires periodically.
 
@@ -60,7 +60,7 @@ If automatic detection doesn't work:
 
 ### 1. Enable in VS Code settings
 
-Set `claudeUsage.notificationSound.enabled` to `true`.
+Set `jeanClaude.notificationSound.enabled` to `true`.
 
 ### 2. Configure Claude Code hooks
 
@@ -94,30 +94,30 @@ The extension uses two detection mechanisms:
 
 ## Extension Settings
 
-Open Settings (`Ctrl+,`) and search for "Claude Usage":
+Open Settings (`Ctrl+,`) and search for "Jean Claude":
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `claudeUsage.authMethod` | `auto` | `auto` = OAuth + fallback to cookie, `cookie` = cookie only |
-| `claudeUsage.sessionKey` | (empty) | Session cookie from browser |
-| `claudeUsage.refreshInterval` | `5` | Data refresh interval in minutes (1-60) |
-| `claudeUsage.notificationSound.enabled` | `false` | Enable notification sounds |
-| `claudeUsage.notificationSound.onQuestion` | `true` | Sound when Claude asks for input |
-| `claudeUsage.notificationSound.onTaskComplete` | `true` | Sound when Claude finishes a task |
+| `jeanClaude.authMethod` | `auto` | `auto` = OAuth + fallback to cookie, `cookie` = cookie only |
+| `jeanClaude.sessionKey` | (empty) | Session cookie from browser |
+| `jeanClaude.refreshInterval` | `5` | Data refresh interval in minutes (1-60) |
+| `jeanClaude.notificationSound.enabled` | `false` | Enable notification sounds |
+| `jeanClaude.notificationSound.onQuestion` | `true` | Sound when Claude asks for input |
+| `jeanClaude.notificationSound.onTaskComplete` | `true` | Sound when Claude finishes a task |
 
 ## Commands
 
 Open Command Palette (`Ctrl+Shift+P`):
 
-- **Claude Usage: Refresh** - manually refresh usage data
-- **Claude Usage: Set Session Key** - set session cookie
+- **Jean Claude: Refresh** - manually refresh usage data
+- **Jean Claude: Set Session Key** - set session cookie
 
 ## Development
 
 ### Project Structure
 
 ```
-claude-usage-limits/
+jean-claude/
 ├── src/
 │   ├── extension.ts        # Entry point, activation, polling
 │   ├── api.ts              # API client (OAuth + web cookie)
@@ -146,4 +146,4 @@ npx @vscode/vsce package # Package as .vsix
 
 ## Uninstall
 
-Via VS Code: `Ctrl+Shift+X` → find "Claude Usage Limits" → **Uninstall**.
+Via VS Code: `Ctrl+Shift+X` → find "Jean Claude" → **Uninstall**.
