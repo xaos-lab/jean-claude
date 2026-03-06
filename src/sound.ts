@@ -1,36 +1,38 @@
 import { execFile, exec } from "child_process";
+import * as vscode from "vscode";
 import * as os from "os";
 import * as path from "path";
 
 export type SoundType = "taskComplete" | "question";
+
+function getSoundFile(): string {
+  const extensionPath = vscode.extensions.getExtension("tomasjanu.jean-claude")?.extensionPath;
+  if (extensionPath) {
+    return path.join(extensionPath, "src", "icq.mp3");
+  }
+  return path.join(__dirname, "..", "src", "icq.mp3");
+}
 
 function getPowerShellPath(): string {
   const sysRoot = process.env.SystemRoot || "C:\\Windows";
   return path.join(sysRoot, "System32", "WindowsPowerShell", "v1.0", "powershell.exe");
 }
 
-export function playSound(type: SoundType): void {
+export function playSound(_type: SoundType): void {
   const platform = os.platform();
+  const soundFile = getSoundFile();
 
   if (platform === "win32") {
-    const freq = type === "taskComplete" ? 600 : 800;
-    const duration = type === "taskComplete" ? 300 : 200;
     execFile(
       getPowerShellPath(),
-      ["-NoProfile", "-Command", `[console]::beep(${freq},${duration})`],
+      ["-NoProfile", "-Command", `Add-Type -AssemblyName PresentationCore; $p = New-Object System.Windows.Media.MediaPlayer; $p.Open([uri]'${soundFile}'); $p.Play(); Start-Sleep -Milliseconds 3000`],
       () => {}
     );
   } else if (platform === "darwin") {
-    const file =
-      type === "taskComplete"
-        ? "/System/Library/Sounds/Glass.aiff"
-        : "/System/Library/Sounds/Ping.aiff";
-    execFile("afplay", [file], () => {});
+    execFile("afplay", [soundFile], () => {});
   } else {
-    const sound =
-      type === "taskComplete" ? "complete" : "dialog-question";
     exec(
-      `canberra-gtk-play -i ${sound} 2>/dev/null || paplay /usr/share/sounds/freedesktop/stereo/${sound}.oga 2>/dev/null || echo -e '\\a'`,
+      `mpv --no-video "${soundFile}" 2>/dev/null || ffplay -nodisp -autoexit "${soundFile}" 2>/dev/null || paplay "${soundFile}" 2>/dev/null`,
       () => {}
     );
   }
