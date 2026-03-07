@@ -58,6 +58,21 @@
           "default": false,
           "description": "Play a sound when Claude Code asks a question or finishes a task in the terminal"
         },
+        "jeanClaude.notificationSound.sound": {
+          "type": "string",
+          "default": "icq",
+          "enum": ["icq", "pop"],
+          "enumDescriptions": [
+            "ICQ notification sound",
+            "Pop notification sound"
+          ],
+          "description": "Which notification sound to play"
+        },
+        "jeanClaude.notificationSound.showNotification": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a Windows notification when Claude Code needs attention"
+        },
         "jeanClaude.notificationSound.onQuestion": {
           "type": "boolean",
           "default": true,
