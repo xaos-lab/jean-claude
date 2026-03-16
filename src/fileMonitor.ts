@@ -117,12 +117,10 @@ export class FileMonitor implements vscode.Disposable {
       if (type === "notify") {
         if (config.get<boolean>("onQuestion", true)) {
           playSound("question");
-          vscode.window.showWarningMessage(`Claude Code: ${message}`);
         }
       } else {
         if (config.get<boolean>("onTaskComplete", true)) {
           playSound("taskComplete");
-          vscode.window.showInformationMessage(`Claude Code: ${message}`);
         }
       }
     } catch {
