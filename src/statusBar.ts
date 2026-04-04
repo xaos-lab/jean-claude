@@ -15,6 +15,16 @@ export class StatusBarManager {
     this.item.show();
   }
 
+  showDisabled(): void {
+    this.item.text = "$(cloud) Claude: off";
+    this.item.tooltip =
+      "Usage monitor is disabled.\n\n" +
+      "⚠️ Enabling this calls the Anthropic API using your OAuth token,\n" +
+      "which may incur extra usage charges (see billing policy April 2026).\n\n" +
+      'To enable: Settings → jeanClaude.usageMonitor.enabled';
+    this.item.color = undefined;
+  }
+
   showLoading(): void {
     this.item.text = "$(cloud) Claude: ...";
     this.item.tooltip = "Loading usage data...";

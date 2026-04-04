@@ -7,11 +7,14 @@ Displays your current Claude.ai usage limits directly in the VS Code status bar 
 ## Features
 
 ### Usage Monitor
+- **Disabled by default** — must be explicitly enabled in settings
 - **5h** - current 5-hour session usage (%)
 - **7d** - weekly usage across all models (%)
 - Color coding: green (<50%), yellow (50-80%), red (>80%)
 - Tooltip with detailed breakdown (Sonnet, Opus, reset times)
 - Automatic OAuth token refresh when expired (via Claude Code CLI)
+
+> **⚠️ Billing notice (April 2026):** The usage monitor calls the Anthropic API using your OAuth token or session cookie. Under the [new billing policy](https://claude.ai), third-party API access is no longer covered by your Claude subscription and may incur extra usage charges. Enable at your own discretion.
 
 ### Notification Sounds
 - Plays a sound when Claude Code **asks a question** (tool approval, user input)
@@ -154,6 +157,7 @@ Open Settings (`Ctrl+,`) and search for "Jean Claude":
 
 | Setting | Default | Description |
 |---------|---------|-------------|
+| `jeanClaude.usageMonitor.enabled` | `false` | Enable usage monitor (⚠️ calls Anthropic API, may incur extra charges) |
 | `jeanClaude.authMethod` | `auto` | `auto` = OAuth + fallback to cookie, `cookie` = cookie only |
 | `jeanClaude.sessionKey` | (empty) | Session cookie from browser |
 | `jeanClaude.refreshInterval` | `5` | Data refresh interval in minutes (1-60) |

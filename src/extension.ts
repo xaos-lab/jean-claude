@@ -12,7 +12,18 @@ let terminalMonitor: TerminalMonitor;
 let fileMonitor: FileMonitor;
 let timer: ReturnType<typeof setInterval> | undefined;
 
+function isUsageMonitorEnabled(): boolean {
+  return vscode.workspace
+    .getConfiguration("jeanClaude")
+    .get<boolean>("usageMonitor.enabled", false);
+}
+
 async function refresh(): Promise<void> {
+  if (!isUsageMonitorEnabled()) {
+    statusBar.showDisabled();
+    return;
+  }
+
   const config = vscode.workspace.getConfiguration("jeanClaude");
   const authMethod = config.get<string>("authMethod", "auto");
   const sessionKey = config.get<string>("sessionKey", "");
@@ -53,6 +64,13 @@ export function activate(context: vscode.ExtensionContext): void {
   // Register commands
   context.subscriptions.push(
     vscode.commands.registerCommand("jeanClaude.refresh", async () => {
+      if (!isUsageMonitorEnabled()) {
+        vscode.window.showWarningMessage(
+          "Usage monitor is disabled. Enable it in Settings → jeanClaude.usageMonitor.enabled.\n" +
+          "Note: This calls the Anthropic API and may incur extra usage charges under the new billing policy."
+        );
+        return;
+      }
       statusBar.showLoading();
       await refresh();
     })
@@ -140,15 +158,24 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration("jeanClaude")) {
-        startPolling();
-        refresh();
+        if (isUsageMonitorEnabled()) {
+          startPolling();
+          refresh();
+        } else {
+          stopPolling();
+          statusBar.showDisabled();
+        }
       }
     })
   );
 
-  // Initial fetch and start polling
-  refresh();
-  startPolling();
+  // Initial fetch and start polling (only if usage monitor is enabled)
+  if (isUsageMonitorEnabled()) {
+    refresh();
+    startPolling();
+  } else {
+    statusBar.showDisabled();
+  }
 
   context.subscriptions.push({ dispose: stopPolling });
 }

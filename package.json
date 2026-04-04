@@ -35,6 +35,11 @@
     "configuration": {
       "title": "Jean Claude",
       "properties": {
+        "jeanClaude.usageMonitor.enabled": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable the usage monitor that displays Claude.ai usage limits in the status bar.\n\n⚠️ **Billing notice (April 2026):** This feature calls the Anthropic API using your OAuth token or session cookie. Under the new billing policy, third-party API access is no longer covered by your Claude subscription and may incur extra usage charges. [Learn more](https://claude.ai)."
+        },
         "jeanClaude.authMethod": {
           "type": "string",
           "default": "auto",
