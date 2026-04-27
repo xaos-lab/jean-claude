@@ -16,23 +16,24 @@ export class StatusBarManager {
   }
 
   showDisabled(): void {
-    this.item.text = "$(cloud) Claude: off";
+    this.item.text = "$(cloud) Jean Claude: on";
     this.item.tooltip =
-      "Usage monitor is disabled.\n\n" +
-      "⚠️ Enabling this calls the Anthropic API using your OAuth token,\n" +
+      "Jean Claude is running (notifications active).\n\n" +
+      "Usage monitor is disabled.\n" +
+      "⚠️ Enabling it calls the Anthropic API using your OAuth token,\n" +
       "which may incur extra usage charges (see billing policy April 2026).\n\n" +
-      'To enable: Settings → jeanClaude.usageMonitor.enabled';
+      "To enable: Settings → jeanClaude.usageMonitor.enabled";
     this.item.color = undefined;
   }
 
   showLoading(): void {
-    this.item.text = "$(cloud) Claude: ...";
+    this.item.text = "$(cloud) Jean Claude: ...";
     this.item.tooltip = "Loading usage data...";
     this.item.color = undefined;
   }
 
   showError(message: string): void {
-    this.item.text = "$(cloud) Claude: $(warning)";
+    this.item.text = "$(cloud) Jean Claude: $(warning)";
     this.item.tooltip = `Error: ${message}\nClick to retry`;
     this.item.color = new vscode.ThemeColor("statusBarItem.warningForeground");
   }
@@ -42,7 +43,7 @@ export class StatusBarManager {
     const sevenDay = Math.round(data.seven_day.utilization);
 
     // Main text
-    this.item.text = `$(cloud) Claude: 5h ${fiveHour}% | 7d ${sevenDay}%`;
+    this.item.text = `$(cloud) Jean Claude: 5h ${fiveHour}% | 7d ${sevenDay}%`;
 
     // Color based on highest usage
     const maxUsage = Math.max(fiveHour, sevenDay);
