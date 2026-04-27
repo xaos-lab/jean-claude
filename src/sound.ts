@@ -17,9 +17,9 @@ function getSoundFile(): string {
 
   const extensionPath = vscode.extensions.getExtension("tomasjanu.jean-claude")?.extensionPath;
   if (extensionPath) {
-    return path.join(extensionPath, "src", filename);
+    return path.join(extensionPath, "sounds", filename);
   }
-  return path.join(__dirname, "..", "src", filename);
+  return path.join(__dirname, "..", "sounds", filename);
 }
 
 function getPowerShellPath(): string {
