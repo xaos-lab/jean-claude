@@ -4,11 +4,9 @@ import * as path from "path";
 import * as os from "os";
 import { fetchUsage } from "./api";
 import { StatusBarManager } from "./statusBar";
-import { TerminalMonitor } from "./terminalMonitor";
 import { FileMonitor } from "./fileMonitor";
 
 let statusBar: StatusBarManager;
-let terminalMonitor: TerminalMonitor;
 let fileMonitor: FileMonitor;
 let timer: ReturnType<typeof setInterval> | undefined;
 
@@ -54,9 +52,6 @@ function stopPolling(): void {
 export function activate(context: vscode.ExtensionContext): void {
   statusBar = new StatusBarManager();
   context.subscriptions.push({ dispose: () => statusBar.dispose() });
-
-  terminalMonitor = new TerminalMonitor();
-  context.subscriptions.push(terminalMonitor);
 
   fileMonitor = new FileMonitor();
   context.subscriptions.push(fileMonitor);
@@ -111,15 +106,24 @@ export function activate(context: vscode.ExtensionContext): void {
 
       const hooks = (settings.hooks || {}) as Record<string, unknown>;
 
+      // Absolute paths with forward slashes work in both cmd.exe and bash
+      // (a bare "~" is NOT expanded by cmd.exe on Windows).
+      const notifyFile = path
+        .join(os.homedir(), ".claude", "claude-notify")
+        .replace(/\\/g, "/");
+      const stopFile = path
+        .join(os.homedir(), ".claude", "claude-stop")
+        .replace(/\\/g, "/");
+
+      // Only two events are needed. "Notification" fires exactly when Claude
+      // needs the user (tool permission, or 60s idle at the prompt); "Stop"
+      // fires when the turn actually ends. No terminal-scraping guesswork.
       const requiredHooks: Record<string, { command: string }[]> = {
-        PermissionRequest: [
-          { command: 'echo "Permission needed" > ~/.claude/claude-notify' },
-        ],
         Notification: [
-          { command: 'echo "$CLAUDE_NOTIFICATION" > ~/.claude/claude-notify' },
+          { command: `echo needs-input > "${notifyFile}"` },
         ],
         Stop: [
-          { command: "echo done > ~/.claude/claude-stop" },
+          { command: `echo done > "${stopFile}"` },
         ],
       };
 
