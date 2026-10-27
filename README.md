@@ -1,6 +1,6 @@
 # Jean Claude - VS Code Extension
 
-Displays your current Claude.ai usage limits directly in the VS Code status bar and plays notification sounds when Claude Code needs your attention.
+Makes it obvious which Claude Code session needs you: the session's tab blinks, and a sound, a Windows notification and a taskbar flash point you to the right VS Code window. Optionally shows your Claude.ai usage limits in the status bar.
 
 ![Status bar example](https://img.shields.io/badge/☁_Claude:_5h_12%25_|_7d_35%25-blue?style=flat-square)
 
@@ -16,10 +16,19 @@ Displays your current Claude.ai usage limits directly in the VS Code status bar 
 
 > **⚠️ Billing notice (April 2026):** The usage monitor calls the Anthropic API using your OAuth token or session cookie. Under the [new billing policy](https://claude.ai), third-party API access is no longer covered by your Claude subscription and may incur extra usage charges. Enable at your own discretion.
 
+### Blinking session tabs
+- The Claude Code extension already puts a dot on the icon of the exact session tab that needs you: **blue** = waiting for your answer or permission, **orange** = finished and not seen yet
+- Jean Claude makes that dot **blink**, so you can spot the right session among many tabs
+- It works by adding a small CSS animation to two icon files of the Claude Code extension (`claude-logo-pending.svg`, `claude-logo-done.svg`). Claude Code installs every update into a new folder, so Jean Claude re-applies it automatically after each update
+- Reload the window once after installing to see it
+- Turn it off with `jeanClaude.blinkingTabs.enabled`; the original icons are restored (also when you uninstall Jean Claude)
+
 ### Notification Sounds
 - Plays a sound when Claude Code **asks a question** (tool approval, user input)
 - Plays a sound when Claude Code **finishes a task**
-- Works with both **Claude Code CLI** (terminal) and **Claude Code Extension** (via hooks)
+- When VS Code is not focused: shows a Windows notification and flashes **this** VS Code window in the taskbar
+- Works with both the **Claude Code extension** panel and the **Claude Code CLI** in VS Code's integrated terminal (via hooks)
+- Each VS Code window reacts **only to its own sessions**. Sessions in the Claude desktop app, in a separate terminal (cmd, PowerShell, Windows Terminal) or in another VS Code window are ignored
 
 ## Installation
 
@@ -98,7 +107,7 @@ After making changes, run `npm run compile` and reload VS Code.
 
 Plays a sound when Claude Code asks a question or finishes a task.
 
-**Quickest way:** `Ctrl+Shift+P` → **"Jean Claude: Setup Notifications"** — this enables the setting and adds the required hooks to `~/.claude/settings.json` automatically.
+**Quickest way:** `Ctrl+Shift+P` → **"Jean Claude: Setup Notifications"** — this enables the setting and adds the required hooks to `~/.claude/settings.json` automatically. Hooks written by older versions of Jean Claude are upgraded automatically when the extension starts (a backup is saved as `~/.claude/settings.json.jean-claude.bak`).
 
 **Manual setup** — if you prefer to do it yourself:
 
@@ -106,27 +115,18 @@ Plays a sound when Claude Code asks a question or finishes a task.
 - `Ctrl+,` → search `jeanClaude.notificationSound.enabled` → check the box
 - Or add to your `settings.json`: `"jeanClaude.notificationSound.enabled": true`
 
-**B) Add Claude Code hooks** to `~/.claude/settings.json` (or project-level `.claude/settings.local.json`):
+**B) Add Claude Code hooks** to `~/.claude/settings.json` (replace `C:/Users/you` with your home folder):
 
 ```json
 {
   "hooks": {
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo \"Permission needed\" > ~/.claude/claude-notify"
-          }
-        ]
-      }
-    ],
     "Notification": [
       {
+        "matcher": "permission_prompt|idle_prompt|elicitation_dialog",
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"$CLAUDE_NOTIFICATION\" > ~/.claude/claude-notify"
+            "command": "[ -d \"C:/Users/you/.claude/jean-claude-events\" ] && printf 'event=question\\nentrypoint=%s\\nwindow=%s\\ncwd=%s\\n' \"$CLAUDE_CODE_ENTRYPOINT\" \"$JEAN_CLAUDE_WINDOW\" \"$CLAUDE_PROJECT_DIR\" > \"C:/Users/you/.claude/jean-claude-events/$$-$RANDOM.evt\" || true # jean-claude"
           }
         ]
       }
@@ -136,7 +136,7 @@ Plays a sound when Claude Code asks a question or finishes a task.
         "hooks": [
           {
             "type": "command",
-            "command": "echo done > ~/.claude/claude-stop"
+            "command": "[ -d \"C:/Users/you/.claude/jean-claude-events\" ] && printf 'event=done\\nentrypoint=%s\\nwindow=%s\\ncwd=%s\\n' \"$CLAUDE_CODE_ENTRYPOINT\" \"$JEAN_CLAUDE_WINDOW\" \"$CLAUDE_PROJECT_DIR\" > \"C:/Users/you/.claude/jean-claude-events/$$-$RANDOM.evt\" || true # jean-claude"
           }
         ]
       }
@@ -145,11 +145,13 @@ Plays a sound when Claude Code asks a question or finishes a task.
 }
 ```
 
-These hooks write trigger files that the extension watches. Without them, sounds only work for Claude Code CLI in the VS Code terminal (via built-in terminal monitoring), but **not** for the Claude Code VS Code extension or external terminals.
+How it works:
 
-> `PermissionRequest` — fires when the VS Code extension shows a permission dialog.
-> `Notification` — fires for CLI permission prompts and idle state.
-> `Stop` — fires when Claude finishes a task.
+- Each hook call writes one small file into `~/.claude/jean-claude-events/` saying which app the session runs in (`CLAUDE_CODE_ENTRYPOINT`) and which VS Code window started it (`JEAN_CLAUDE_WINDOW`).
+- Jean Claude sets `JEAN_CLAUDE_WINDOW` for the Claude Code panels and integrated terminals of its own window. Sessions without it (desktop app, external terminals) are ignored.
+- Every window reads the files, reacts only to its own sessions, and deletes files older than a minute.
+- If the folder does not exist (Jean Claude not installed), the hooks do nothing.
+- The hooks are bash commands. On Windows, Claude Code runs hooks in Git Bash by default.
 
 ## Extension Settings
 
@@ -161,9 +163,11 @@ Open Settings (`Ctrl+,`) and search for "Jean Claude":
 | `jeanClaude.authMethod` | `auto` | `auto` = OAuth + fallback to cookie, `cookie` = cookie only |
 | `jeanClaude.sessionKey` | (empty) | Session cookie from browser |
 | `jeanClaude.refreshInterval` | `5` | Data refresh interval in minutes (1-60) |
-| `jeanClaude.notificationSound.enabled` | `false` | Enable notification sounds |
+| `jeanClaude.blinkingTabs.enabled` | `true` | Make the blue/orange dot on Claude Code session tabs blink |
+| `jeanClaude.notificationSound.enabled` | `false` | Enable notification sounds (only for sessions of this window) |
 | `jeanClaude.notificationSound.sound` | `icq` | Which sound to play (`icq` or `pop`) |
-| `jeanClaude.notificationSound.showNotification` | `true` | Show Windows toast notification + flash taskbar when VS Code is not focused |
+| `jeanClaude.notificationSound.showNotification` | `true` | Show a Windows notification when VS Code is not focused |
+| `jeanClaude.notificationSound.flashTaskbar` | `true` | Flash this VS Code window in the taskbar when VS Code is not focused (Windows) |
 | `jeanClaude.notificationSound.onQuestion` | `true` | Sound when Claude asks for input |
 | `jeanClaude.notificationSound.onTaskComplete` | `true` | Sound when Claude finishes a task |
 
@@ -185,9 +189,11 @@ jean-claude/
 │   ├── extension.ts        # Entry point, activation, polling
 │   ├── api.ts              # API client (OAuth + web cookie, token refresh)
 │   ├── statusBar.ts        # Status bar UI, formatting, colors
-│   ├── terminalMonitor.ts  # Terminal output watcher for Claude CLI
-│   ├── fileMonitor.ts      # Trigger file watcher for hooks
-│   └── sound.ts            # Cross-platform sound player
+│   ├── hooks.ts            # Adds/upgrades/removes hooks in ~/.claude/settings.json
+│   ├── eventMonitor.ts     # Reads hook event files, keeps only this window's sessions
+│   ├── tabIcons.ts         # Adds the blink animation to Claude Code's tab icons
+│   ├── sound.ts            # Sound, Windows notification, taskbar flash
+│   └── uninstall.ts        # Cleanup when the extension is uninstalled
 ├── out/                    # Compiled JavaScript (generated)
 ├── package.json            # Extension manifest
 └── tsconfig.json           # TypeScript configuration
@@ -204,3 +210,5 @@ npx @vscode/vsce package # Package as .vsix
 ## Uninstall
 
 Via VS Code: `Ctrl+Shift+X` → find "Jean Claude" → **Uninstall**.
+
+After VS Code restarts, an uninstall script removes the Jean Claude hooks from `~/.claude/settings.json`, deletes `~/.claude/jean-claude-events/` and restores the original Claude Code tab icons.

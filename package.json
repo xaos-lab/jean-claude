@@ -1,8 +1,8 @@
 {
   "name": "jean-claude",
   "displayName": "Jean Claude",
-  "description": "Shows Claude.ai usage limits in the VS Code status bar",
-  "version": "0.2.2",
+  "description": "Claude Code helper: blinking session tabs, notification sounds for the right VS Code window, and Claude.ai usage limits in the status bar",
+  "version": "0.3.0",
   "author": "Tomas Janu",
   "publisher": "tomasjanu",
   "license": "MIT",
@@ -62,25 +62,32 @@
           "maximum": 60,
           "description": "Refresh interval in minutes"
         },
+        "jeanClaude.blinkingTabs.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Make the status dot on Claude Code session tabs blink: **blue** = the session is waiting for you, **orange** = it finished and you have not looked yet. Jean Claude adds a small CSS animation to the Claude Code extension's tab icons (re-applied after every Claude Code update). Reload the window after changing this."
+        },
         "jeanClaude.notificationSound.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Play a sound when Claude Code asks a question or finishes a task in the terminal"
+          "description": "Play a sound when a Claude Code session in this VS Code window asks for input or finishes a task (sessions in the Claude desktop app or other terminals are ignored)"
         },
         "jeanClaude.notificationSound.sound": {
           "type": "string",
           "default": "icq",
           "enum": ["icq", "pop"],
-          "enumDescriptions": [
-            "ICQ notification sound",
-            "Pop notification sound"
-          ],
+          "enumDescriptions": ["ICQ notification sound", "Pop notification sound"],
           "description": "Which notification sound to play"
         },
         "jeanClaude.notificationSound.showNotification": {
           "type": "boolean",
           "default": true,
-          "description": "Show a Windows notification when Claude Code needs attention"
+          "description": "Show a Windows notification when Claude Code needs attention and VS Code is not focused"
+        },
+        "jeanClaude.notificationSound.flashTaskbar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Flash this VS Code window in the taskbar when Claude Code needs attention and VS Code is not focused (Windows)"
         },
         "jeanClaude.notificationSound.onQuestion": {
           "type": "boolean",
@@ -98,7 +105,8 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "package": "vsce package",
+    "vscode:uninstall": "node ./out/uninstall.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
