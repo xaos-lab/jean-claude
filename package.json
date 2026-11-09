@@ -1,7 +1,7 @@
 {
   "name": "jean-claude",
   "displayName": "Jean Claude",
-  "description": "Claude Code helper: blinking session tabs, notification sounds for the right VS Code window, and rainbow-colored CSV columns",
+  "description": "XAOS Lab's VS Code extension: a growing set of tools you turn on one by one. Now: blinking Claude Code session tabs, notifications for the right VS Code window, rainbow-colored CSV columns",
   "version": "0.3.0",
   "author": "Tomas Janu",
   "publisher": "tomasjanu",
@@ -51,22 +51,22 @@
         "jeanClaude.notificationSound.showNotification": {
           "type": "boolean",
           "default": true,
-          "description": "Show a Windows notification when Claude Code needs attention and VS Code is not focused"
+          "description": "Also show a notification when VS Code is not focused (a Windows notification; a VS Code message on macOS/Linux)"
         },
         "jeanClaude.notificationSound.flashTaskbar": {
           "type": "boolean",
           "default": true,
-          "description": "Flash this VS Code window in the taskbar when Claude Code needs attention and VS Code is not focused (Windows)"
+          "description": "Also flash this VS Code window in the taskbar when VS Code is not focused (Windows)"
         },
         "jeanClaude.notificationSound.onQuestion": {
           "type": "boolean",
           "default": true,
-          "description": "Play a sound when Claude Code asks for user input (e.g. tool approval)"
+          "description": "Alert (sound, notification, taskbar flash) when a Claude Code session needs you: asks for permission, asks a question, or waits for your reply"
         },
         "jeanClaude.notificationSound.onTaskComplete": {
           "type": "boolean",
           "default": true,
-          "description": "Play a sound when Claude Code finishes a task (command exits)"
+          "description": "Alert (sound, notification, taskbar flash) when a Claude Code session finishes its reply"
         },
         "jeanClaude.rainbowCsv.enabled": {
           "type": "boolean",
