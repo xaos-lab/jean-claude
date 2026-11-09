@@ -2,8 +2,8 @@
 // is uninstalled: removes our hooks, the event folder and the tab icon patch.
 import * as fs from "fs";
 import * as path from "path";
-import { EVENTS_DIR, removeHooks } from "./hooks";
-import { findClaudeCodeDirs, setBlinking } from "./tabIcons";
+import { EVENTS_DIR, removeHooks } from "./core/hooks";
+import { findClaudeCodeDirs, setBlinking } from "./features/blinkingTabs/tabIcons";
 
 try {
   removeHooks();

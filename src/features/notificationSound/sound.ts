@@ -2,29 +2,12 @@ import { execFile, exec } from "child_process";
 import * as vscode from "vscode";
 import * as os from "os";
 import * as path from "path";
-import type { ClaudeEventType } from "./eventMonitor";
-
-const soundFiles: Record<string, string> = {
-  icq: "icq.mp3",
-  pop: "pop.mp3",
-};
+import type { ClaudeEventType } from "../../core/eventMonitor";
 
 const messages: Record<ClaudeEventType, string> = {
   question: "Claude Code is waiting for your input",
   done: "Claude Code has finished the task",
 };
-
-function getSoundFile(): string {
-  const config = vscode.workspace.getConfiguration("jeanClaude");
-  const sound = config.get<string>("notificationSound.sound", "icq");
-  const filename = soundFiles[sound] || soundFiles.icq;
-
-  const extensionPath = vscode.extensions.getExtension("tomasjanu.jean-claude")?.extensionPath;
-  if (extensionPath) {
-    return path.join(extensionPath, "sounds", filename);
-  }
-  return path.join(__dirname, "..", "sounds", filename);
-}
 
 function getPowerShellPath(): string {
   const sysRoot = process.env.SystemRoot || "C:\\Windows";
@@ -41,8 +24,7 @@ function runPowerShell(script: string, env: Record<string, string>): void {
   );
 }
 
-export function playSound(): void {
-  const soundFile = getSoundFile();
+export function playSound(soundFile: string): void {
   const platform = os.platform();
 
   if (platform === "win32") {

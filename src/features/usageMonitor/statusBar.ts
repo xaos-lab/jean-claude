@@ -1,66 +1,50 @@
 import * as vscode from "vscode";
 import { UsageData, UsageBucket } from "./api";
 
-export class StatusBarManager {
+/** The usage monitor's own status bar item, next to the "Jean Claude" one. */
+export class UsageStatusBar implements vscode.Disposable {
   private item: vscode.StatusBarItem;
+  private disposed = false;
 
   constructor() {
     this.item = vscode.window.createStatusBarItem(
+      "jeanClaude.usage",
       vscode.StatusBarAlignment.Right,
-      50
+      49
     );
     this.item.command = "jeanClaude.refresh";
-    this.item.name = "Jean Claude";
+    this.item.name = "Jean Claude: Usage";
     this.showLoading();
     this.item.show();
   }
 
-  showDisabled(): void {
-    this.item.text = "$(cloud) Jean Claude: on";
-    this.item.tooltip =
-      "Jean Claude is running (notifications active).\n\n" +
-      "Usage monitor is disabled.\n" +
-      "⚠️ Enabling it calls the Anthropic API using your OAuth token,\n" +
-      "which may incur extra usage charges (see billing policy April 2026).\n\n" +
-      "To enable: Settings → jeanClaude.usageMonitor.enabled";
-    this.item.color = undefined;
-  }
-
   showLoading(): void {
-    this.item.text = "$(cloud) Jean Claude: ...";
-    this.item.tooltip = "Loading usage data...";
-    this.item.color = undefined;
+    this.set("$(graph) ...", "Loading usage data...");
   }
 
   showError(message: string): void {
-    this.item.text = "$(cloud) Jean Claude: $(warning)";
-    this.item.tooltip = `Error: ${message}\nClick to retry`;
-    this.item.color = new vscode.ThemeColor("statusBarItem.warningForeground");
+    this.set(
+      "$(graph) $(warning)",
+      `Error: ${message}\nClick to retry`,
+      new vscode.ThemeColor("statusBarItem.warningForeground")
+    );
   }
 
   update(data: UsageData): void {
     const fiveHour = Math.round(data.five_hour.utilization);
     const sevenDay = Math.round(data.seven_day.utilization);
 
-    // Main text
-    this.item.text = `$(cloud) Jean Claude: 5h ${fiveHour}% | 7d ${sevenDay}%`;
-
     // Color based on highest usage
     const maxUsage = Math.max(fiveHour, sevenDay);
-    if (maxUsage >= 80) {
-      this.item.color = new vscode.ThemeColor(
-        "statusBarItem.errorForeground"
-      );
-    } else if (maxUsage >= 50) {
-      this.item.color = new vscode.ThemeColor(
-        "statusBarItem.warningForeground"
-      );
-    } else {
-      this.item.color = undefined;
-    }
+    const color =
+      maxUsage >= 80
+        ? new vscode.ThemeColor("statusBarItem.errorForeground")
+        : maxUsage >= 50
+          ? new vscode.ThemeColor("statusBarItem.warningForeground")
+          : undefined;
 
     // Detailed tooltip
-    const lines: string[] = ["Jean Claude", ""];
+    const lines: string[] = ["Claude usage", ""];
     lines.push(formatBucket("Current session (5h)", data.five_hour));
     lines.push(formatBucket("Weekly - All models", data.seven_day));
 
@@ -72,10 +56,21 @@ export class StatusBarManager {
     }
 
     lines.push("", "Click to refresh");
-    this.item.tooltip = lines.join("\n");
+    this.set(`$(graph) 5h ${fiveHour}% | 7d ${sevenDay}%`, lines.join("\n"), color);
+  }
+
+  /** Ignores late results that arrive after the feature was turned off. */
+  private set(text: string, tooltip: string, color?: vscode.ThemeColor): void {
+    if (this.disposed) {
+      return;
+    }
+    this.item.text = text;
+    this.item.tooltip = tooltip;
+    this.item.color = color;
   }
 
   dispose(): void {
+    this.disposed = true;
     this.item.dispose();
   }
 }

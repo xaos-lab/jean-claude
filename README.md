@@ -6,8 +6,17 @@ Makes it obvious which Claude Code session needs you: the session's tab blinks, 
 
 ## Features
 
+Every feature can be turned on or off on its own. Click **Jean Claude** in the status bar (bottom right), check the features you want and press `Enter`. The change applies right away, no reload needed (except for blinking tabs, see below). The same switches are in Settings as `jeanClaude.<feature>.enabled`.
+
+| Feature | Default |
+|---------|---------|
+| Blinking session tabs | on |
+| Notifications | off |
+| Usage monitor | off |
+
 ### Usage Monitor
-- **Disabled by default** — must be explicitly enabled in settings
+- **Disabled by default** — turn it on in the Jean Claude menu or in settings
+- Shown as its own item next to **Jean Claude** in the status bar; click it to refresh
 - **5h** - current 5-hour session usage (%)
 - **7d** - weekly usage across all models (%)
 - Color coding: green (<50%), yellow (50-80%), red (>80%)
@@ -21,7 +30,7 @@ Makes it obvious which Claude Code session needs you: the session's tab blinks, 
 - Jean Claude makes that dot **blink**, so you can spot the right session among many tabs
 - It works by adding a small CSS animation to two icon files of the Claude Code extension (`claude-logo-pending.svg`, `claude-logo-done.svg`). Claude Code installs every update into a new folder, so Jean Claude re-applies it automatically after each update
 - Reload the window once after installing to see it
-- Turn it off with `jeanClaude.blinkingTabs.enabled`; the original icons are restored (also when you uninstall Jean Claude)
+- When you turn it off, the original icons are restored (also when you uninstall Jean Claude); reload the window to see the change
 
 ### Notification Sounds
 - Plays a sound when Claude Code **asks a question** (tool approval, user input)
@@ -107,7 +116,7 @@ After making changes, run `npm run compile` and reload VS Code.
 
 Plays a sound when Claude Code asks a question or finishes a task.
 
-**Quickest way:** `Ctrl+Shift+P` → **"Jean Claude: Setup Notifications"** — this enables the setting and adds the required hooks to `~/.claude/settings.json` automatically. Hooks written by older versions of Jean Claude are upgraded automatically when the extension starts (a backup is saved as `~/.claude/settings.json.jean-claude.bak`).
+**Quickest way:** click **Jean Claude** in the status bar and check **Notifications** (or `Ctrl+Shift+P` → **"Jean Claude: Setup Notifications"**). Turning the feature on adds the required hooks to `~/.claude/settings.json` automatically. Hooks written by older versions of Jean Claude are upgraded automatically when the extension starts (a backup is saved as `~/.claude/settings.json.jean-claude.bak`).
 
 **Manual setup** — if you prefer to do it yourself:
 
@@ -175,8 +184,9 @@ Open Settings (`Ctrl+,`) and search for "Jean Claude":
 
 Open Command Palette (`Ctrl+Shift+P`):
 
-- **Jean Claude: Refresh** - manually refresh usage data
-- **Jean Claude: Set Session Key** - set session cookie
+- **Jean Claude: Turn Features On/Off** - the same checkbox menu as clicking **Jean Claude** in the status bar
+- **Jean Claude: Refresh** - manually refresh usage data (only while the usage monitor is on)
+- **Jean Claude: Set Session Key** - set session cookie (only while the usage monitor is on)
 - **Jean Claude: Setup Notifications** - enable notification sounds and add hooks to `~/.claude/settings.json`
 
 ## Development
@@ -186,18 +196,90 @@ Open Command Palette (`Ctrl+Shift+P`):
 ```
 jean-claude/
 ├── src/
-│   ├── extension.ts        # Entry point, activation, polling
-│   ├── api.ts              # API client (OAuth + web cookie, token refresh)
-│   ├── statusBar.ts        # Status bar UI, formatting, colors
-│   ├── hooks.ts            # Adds/upgrades/removes hooks in ~/.claude/settings.json
-│   ├── eventMonitor.ts     # Reads hook event files, keeps only this window's sessions
-│   ├── tabIcons.ts         # Adds the blink animation to Claude Code's tab icons
-│   ├── sound.ts            # Sound, Windows notification, taskbar flash
-│   └── uninstall.ts        # Cleanup when the extension is uninstalled
-├── out/                    # Compiled JavaScript (generated)
-├── package.json            # Extension manifest
-└── tsconfig.json           # TypeScript configuration
+│   ├── extension.ts              # Entry point: shared services + feature manager
+│   ├── core/
+│   │   ├── feature.ts            # Feature + FeatureContext interfaces (start here)
+│   │   ├── featureManager.ts     # Turns features on/off, status bar item, checkbox menu
+│   │   ├── eventMonitor.ts       # Reads hook event files, keeps only this window's sessions
+│   │   └── hooks.ts              # Adds/upgrades/removes hooks in ~/.claude/settings.json
+│   ├── features/
+│   │   ├── index.ts              # List of all features (register new ones here)
+│   │   ├── blinkingTabs/         # Blink animation in Claude Code's tab icons
+│   │   ├── notificationSound/    # Sound, Windows notification, taskbar flash
+│   │   └── usageMonitor/         # API client + usage status bar item
+│   └── uninstall.ts              # Cleanup when the extension is uninstalled
+├── out/                          # Compiled JavaScript (generated)
+├── package.json                  # Extension manifest
+└── tsconfig.json                 # TypeScript configuration
 ```
+
+### Adding a feature
+
+A feature is one folder in `src/features/`. The feature manager starts it when it is turned on and stops it when it is turned off, so the feature only has to say what to do while it is on.
+
+1. **Create `src/features/<id>/index.ts`.** The `id` is also the settings prefix (`jeanClaude.<id>.*`).
+
+   ```ts
+   import * as vscode from "vscode";
+   import type { Feature } from "../../core/feature";
+
+   export const myFeature: Feature = {
+     id: "myFeature",
+     title: "My feature",                          // shown in the Jean Claude menu
+     description: "One sentence about what it does.",
+
+     activate(ctx) {
+       // Everything in ctx.subscriptions is disposed when the feature is turned off.
+       ctx.subscriptions.push(
+         ctx.onClaudeEvent((type) => {             // "question" or "done", this window only
+           if (ctx.settings().get<boolean>("loud", false)) {
+             vscode.window.showInformationMessage(`Claude: ${type}`);
+           }
+         }),
+         vscode.commands.registerCommand("jeanClaude.myFeature.hello", () => {
+           vscode.window.showInformationMessage("Hello from my feature");
+         })
+       );
+     },
+
+     // Optional: undo changes made outside VS Code (files etc.) when the feature is off.
+     // revert() { ... },
+   };
+   ```
+
+2. **Register it** in [src/features/index.ts](src/features/index.ts) — the order of `FEATURES` is the order in the menu.
+
+3. **Declare the on/off switch** (and any other settings) in `package.json` under `contributes.configuration.properties`:
+
+   ```json
+   "jeanClaude.myFeature.enabled": {
+     "type": "boolean",
+     "default": false,
+     "description": "Turn My feature on or off"
+   }
+   ```
+
+4. **Commands** (optional): add them to `contributes.commands`, and hide them while the feature is off:
+
+   ```json
+   "menus": {
+     "commandPalette": [
+       { "command": "jeanClaude.myFeature.hello", "when": "config.jeanClaude.myFeature.enabled" }
+     ]
+   }
+   ```
+
+What a feature gets in `ctx` (see [src/core/feature.ts](src/core/feature.ts)):
+
+| Field | What it is |
+|-------|-----------|
+| `subscriptions` | Put timers, listeners, commands and status bar items here; disposed when the feature is turned off |
+| `settings()` | The feature's settings, `jeanClaude.<id>.*` |
+| `onClaudeEvent` | Fires when a Claude Code session of this window asks for input (`question`) or finishes (`done`). Needs the Jean Claude hooks; see how `notificationSound` installs them |
+| `log` | The **Jean Claude** output channel (`View → Output`); errors of features are logged here too |
+| `extension` | The VS Code `ExtensionContext` (extension path, storage, secrets) |
+
+Other options on `Feature`: `restartOn` restarts the feature when one of the listed settings changes, and `revert()` runs whenever the feature is off (at startup and when turned off, not when VS Code just closes). If `activate` throws, the feature is stopped, the error is shown and the status bar shows a warning; the other features keep working.
 
 ### Useful Commands
 

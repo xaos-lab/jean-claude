@@ -20,6 +20,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "jeanClaude.features",
+        "title": "Jean Claude: Turn Features On/Off"
+      },
+      {
         "command": "jeanClaude.refresh",
         "title": "Jean Claude: Refresh"
       },
@@ -38,7 +42,7 @@
         "jeanClaude.usageMonitor.enabled": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "Enable the usage monitor that displays Claude.ai usage limits in the status bar.\n\n⚠️ **Billing notice (April 2026):** This feature calls the Anthropic API using your OAuth token or session cookie. Under the new billing policy, third-party API access is no longer covered by your Claude subscription and may incur extra usage charges. [Learn more](https://claude.ai)."
+          "markdownDescription": "Enable the usage monitor that displays Claude.ai usage limits in the status bar.\n\n⚠️ **Billing notice (April 2026):** This feature calls the Anthropic API using your OAuth token or session cookie. Under the new billing policy, third-party API access is no longer covered by your Claude subscription and may incur extra usage charges. [Learn more](https://claude.ai).\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
         },
         "jeanClaude.authMethod": {
           "type": "string",
@@ -65,12 +69,12 @@
         "jeanClaude.blinkingTabs.enabled": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Make the status dot on Claude Code session tabs blink: **blue** = the session is waiting for you, **orange** = it finished and you have not looked yet. Jean Claude adds a small CSS animation to the Claude Code extension's tab icons (re-applied after every Claude Code update). Reload the window after changing this."
+          "markdownDescription": "Make the status dot on Claude Code session tabs blink: **blue** = the session is waiting for you, **orange** = it finished and you have not looked yet. Jean Claude adds a small CSS animation to the Claude Code extension's tab icons (re-applied after every Claude Code update). Reload the window after changing this.\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
         },
         "jeanClaude.notificationSound.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Play a sound when a Claude Code session in this VS Code window asks for input or finishes a task (sessions in the Claude desktop app or other terminals are ignored)"
+          "markdownDescription": "Play a sound when a Claude Code session in this VS Code window asks for input or finishes a task (sessions in the Claude desktop app or other terminals are ignored). Adds the needed hooks to `~/.claude/settings.json` when turned on.\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
         },
         "jeanClaude.notificationSound.sound": {
           "type": "string",
@@ -100,6 +104,18 @@
           "description": "Play a sound when Claude Code finishes a task (command exits)"
         }
       }
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "jeanClaude.refresh",
+          "when": "config.jeanClaude.usageMonitor.enabled"
+        },
+        {
+          "command": "jeanClaude.setSessionKey",
+          "when": "config.jeanClaude.usageMonitor.enabled"
+        }
+      ]
     }
   },
   "scripts": {
