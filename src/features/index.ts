@@ -3,7 +3,8 @@
 // (see "Adding a feature" in README.md).
 import type { Feature } from "../core/feature";
 import { blinkingTabs } from "./blinkingTabs";
+import { folderTheme } from "./folderTheme";
 import { notificationSound } from "./notificationSound";
 import { rainbowCsv } from "./rainbowCsv";
 
-export const FEATURES: Feature[] = [blinkingTabs, notificationSound, rainbowCsv];
+export const FEATURES: Feature[] = [blinkingTabs, notificationSound, rainbowCsv, folderTheme];

@@ -1,7 +1,7 @@
 {
   "name": "jean-claude",
   "displayName": "Jean Claude",
-  "description": "XAOS Lab's VS Code extension: a growing set of tools you turn on one by one. Now: blinking Claude Code session tabs, notifications for the right VS Code window, rainbow-colored CSV columns",
+  "description": "XAOS Lab's VS Code extension: a growing set of tools you turn on one by one. Now: blinking Claude Code session tabs, notifications for the right VS Code window, rainbow-colored CSV columns, a color theme per project folder",
   "version": "0.3.0",
   "author": "Tomas Janu",
   "publisher": "tomasjanu",
@@ -26,8 +26,20 @@
       {
         "command": "jeanClaude.setupNotifications",
         "title": "Jean Claude: Setup Notifications"
+      },
+      {
+        "command": "jeanClaude.folderTheme.pick",
+        "title": "Jean Claude: Set Theme for This Folder"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "jeanClaude.folderTheme.pick",
+          "when": "config.jeanClaude.folderTheme.enabled && workbenchState != empty"
+        }
+      ]
+    },
     "configuration": {
       "title": "Jean Claude",
       "properties": {
@@ -72,6 +84,16 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Color each column of CSV and TSV files (`.csv`, `.tsv`, `.tab`) in its own color, so the columns are easy to follow. The delimiter (`,` `;` tab `|`) is detected automatically, and quoted fields (including ones spanning several lines) are respected.\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
+        },
+        "jeanClaude.folderTheme.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Give the folder open in this window its own color theme, so windows of different projects are easy to tell apart. Click the palette icon in the status bar (or run **Jean Claude: Set Theme for This Folder**) and pick a theme: it is saved as `workbench.colorTheme` in the folder's `.vscode/settings.json`, so other windows keep their theme.\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
+        },
+        "jeanClaude.folderTheme.showInStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the folder's theme in the status bar (click it to change the theme)"
         }
       }
     }

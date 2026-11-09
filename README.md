@@ -15,6 +15,7 @@ What Jean Claude can do today (more will come as XAOS Lab needs them):
 | [Blinking session tabs](#blinking-session-tabs) | on | The dot on a Claude Code session tab blinks while that session needs you |
 | [Notifications](#notifications) | off | Sound, notification and taskbar flash when a Claude Code session in this window needs you or finishes |
 | [Rainbow CSV](#rainbow-csv) | on | Each column of a CSV/TSV file gets its own color |
+| [Folder theme](#folder-theme) | on | Each project window can have its own color theme, so you don't mix them up |
 
 ### Turning features on and off
 
@@ -98,6 +99,22 @@ Claude Code runs hooks when a session needs you (`Notification`) and when it fin
 - Quoted fields are respected (`"Prague, CZ"` is one field), including fields that span several lines
 - Only the visible part of the file is colored, so large files stay fast; colors update as you type
 
+### Folder theme
+
+When you change the color theme the usual way, every VS Code window changes with it. With several projects open, it helps when each window looks different. VS Code can do that (`workbench.colorTheme` in the folder's `.vscode/settings.json`), but only by editing the file by hand. Jean Claude does it for you:
+
+1. Click the palette icon in the status bar (bottom right), or run **Jean Claude: Set Theme for This Folder**
+2. Move through the list with `↑` `↓`: each theme is shown right away, in this window only
+3. Press `Enter` to keep it, or `Esc` to go back to the previous theme
+
+- The theme is saved as `workbench.colorTheme` in the folder's `.vscode/settings.json` (in a multi-root workspace, in the `.code-workspace` file). Other windows keep their theme, and your other settings in the file stay as they are
+- The status bar shows the folder's theme; just the icon means the folder uses the global theme
+- **Global theme** at the top of the list removes the folder's theme, so the window looks like the others again
+- Once a folder has its own theme, VS Code's own theme picker (`Ctrl+K Ctrl+T`) in that window also changes only the folder's theme
+- If VS Code follows the OS light/dark mode (`window.autoDetectColorScheme`), Jean Claude turns that off for the folder, otherwise VS Code would ignore the folder's theme. **Global theme** turns it back on
+- Pressing `Esc` leaves no trace: if `.vscode/settings.json` did not exist before, it is deleted again
+- If `.vscode/settings.json` is committed to git, the theme is shared with everyone who uses the repository
+
 ## Installation
 
 Pick one of the following options:
@@ -168,6 +185,8 @@ Open Settings (`Ctrl+,`) and search for "Jean Claude", or click ⚙️ in the Je
 | `jeanClaude.notificationSound.showNotification` | `true` | Also show a notification when VS Code is not focused |
 | `jeanClaude.notificationSound.flashTaskbar` | `true` | Also flash this window's taskbar button when VS Code is not focused (Windows) |
 | `jeanClaude.rainbowCsv.enabled` | `true` | Color each column of CSV/TSV files in its own color |
+| `jeanClaude.folderTheme.enabled` | `true` | Let each folder have its own color theme |
+| `jeanClaude.folderTheme.showInStatusBar` | `true` | Show the folder's theme in the status bar (click it to change the theme) |
 
 ## Commands
 
@@ -175,6 +194,7 @@ Open Command Palette (`Ctrl+Shift+P`):
 
 - **Jean Claude: Turn Features On/Off** - the same checkbox menu as clicking **Jean Claude** in the status bar
 - **Jean Claude: Setup Notifications** - turns notifications on and adds the hooks again if they are missing or outdated
+- **Jean Claude: Set Theme for This Folder** - pick a color theme for the folder in this window only (the same as clicking the palette icon in the status bar)
 
 ## Uninstall
 
@@ -199,7 +219,8 @@ jean-claude/
 │   │   ├── index.ts              # List of all features (register new ones here)
 │   │   ├── blinkingTabs/         # Blink animation in Claude Code's tab icons
 │   │   ├── notificationSound/    # Sound, notification, taskbar flash
-│   │   └── rainbowCsv/           # CSV parser + column colors (editor decorations)
+│   │   ├── rainbowCsv/           # CSV parser + column colors (editor decorations)
+│   │   └── folderTheme/          # Theme picker that writes the folder's settings + status bar item
 │   └── uninstall.ts              # Cleanup when the extension is uninstalled
 ├── sounds/                       # Notification sounds (icq.mp3, pop.mp3)
 ├── out/                          # Compiled JavaScript (generated)
