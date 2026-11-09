@@ -1,6 +1,6 @@
 # Jean Claude - VS Code Extension
 
-Makes it obvious which Claude Code session needs you: the session's tab blinks, and a sound, a Windows notification and a taskbar flash point you to the right VS Code window. Optionally shows your Claude.ai usage limits in the status bar.
+Makes it obvious which Claude Code session needs you: the session's tab blinks, and a sound, a Windows notification and a taskbar flash point you to the right VS Code window. Optionally shows your Claude.ai usage limits in the status bar. As a bonus, it colors the columns of CSV files.
 
 ![Status bar example](https://img.shields.io/badge/☁_Claude:_5h_12%25_|_7d_35%25-blue?style=flat-square)
 
@@ -13,6 +13,7 @@ Every feature can be turned on or off on its own. Click **Jean Claude** in the s
 | Blinking session tabs | on |
 | Notifications | off |
 | Usage monitor | off |
+| Rainbow CSV | on |
 
 ### Usage Monitor
 - **Disabled by default** — turn it on in the Jean Claude menu or in settings
@@ -38,6 +39,13 @@ Every feature can be turned on or off on its own. Click **Jean Claude** in the s
 - When VS Code is not focused: shows a Windows notification and flashes **this** VS Code window in the taskbar
 - Works with both the **Claude Code extension** panel and the **Claude Code CLI** in VS Code's integrated terminal (via hooks)
 - Each VS Code window reacts **only to its own sessions**. Sessions in the Claude desktop app, in a separate terminal (cmd, PowerShell, Windows Terminal) or in another VS Code window are ignored
+
+### Rainbow CSV
+- Colors each column of an open CSV or TSV file (`.csv`, `.tsv`, `.tab`) in its own color, so you can follow a column by eye
+- 8 colors that repeat for wider tables, with separate shades for light and dark themes
+- The delimiter is detected automatically: `,` `;` tab or `|` (`.tsv` and `.tab` always use tab)
+- Quoted fields are respected (`"Prague, CZ"` is one field), including fields that span several lines
+- Only the visible part of the file is colored, so large files stay fast; colors update as you type
 
 ## Installation
 
@@ -179,6 +187,7 @@ Open Settings (`Ctrl+,`) and search for "Jean Claude":
 | `jeanClaude.notificationSound.flashTaskbar` | `true` | Flash this VS Code window in the taskbar when VS Code is not focused (Windows) |
 | `jeanClaude.notificationSound.onQuestion` | `true` | Sound when Claude asks for input |
 | `jeanClaude.notificationSound.onTaskComplete` | `true` | Sound when Claude finishes a task |
+| `jeanClaude.rainbowCsv.enabled` | `true` | Color each column of CSV/TSV files in its own color |
 
 ## Commands
 
@@ -206,7 +215,8 @@ jean-claude/
 │   │   ├── index.ts              # List of all features (register new ones here)
 │   │   ├── blinkingTabs/         # Blink animation in Claude Code's tab icons
 │   │   ├── notificationSound/    # Sound, Windows notification, taskbar flash
-│   │   └── usageMonitor/         # API client + usage status bar item
+│   │   ├── usageMonitor/         # API client + usage status bar item
+│   │   └── rainbowCsv/           # CSV parser + column colors (editor decorations)
 │   └── uninstall.ts              # Cleanup when the extension is uninstalled
 ├── out/                          # Compiled JavaScript (generated)
 ├── package.json                  # Extension manifest

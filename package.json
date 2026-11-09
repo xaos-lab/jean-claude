@@ -1,7 +1,7 @@
 {
   "name": "jean-claude",
   "displayName": "Jean Claude",
-  "description": "Claude Code helper: blinking session tabs, notification sounds for the right VS Code window, and Claude.ai usage limits in the status bar",
+  "description": "Claude Code helper: blinking session tabs, notification sounds for the right VS Code window, Claude.ai usage limits in the status bar, and rainbow-colored CSV columns",
   "version": "0.3.0",
   "author": "Tomas Janu",
   "publisher": "tomasjanu",
@@ -102,6 +102,11 @@
           "type": "boolean",
           "default": true,
           "description": "Play a sound when Claude Code finishes a task (command exits)"
+        },
+        "jeanClaude.rainbowCsv.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Color each column of CSV and TSV files (`.csv`, `.tsv`, `.tab`) in its own color, so the columns are easy to follow. The delimiter (`,` `;` tab `|`) is detected automatically, and quoted fields (including ones spanning several lines) are respected.\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
         }
       }
     },

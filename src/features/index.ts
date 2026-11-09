@@ -4,6 +4,7 @@
 import type { Feature } from "../core/feature";
 import { blinkingTabs } from "./blinkingTabs";
 import { notificationSound } from "./notificationSound";
+import { rainbowCsv } from "./rainbowCsv";
 import { usageMonitor } from "./usageMonitor";
 
-export const FEATURES: Feature[] = [blinkingTabs, notificationSound, usageMonitor];
+export const FEATURES: Feature[] = [blinkingTabs, notificationSound, usageMonitor, rainbowCsv];
