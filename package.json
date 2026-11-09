@@ -1,7 +1,7 @@
 {
   "name": "jean-claude",
   "displayName": "Jean Claude",
-  "description": "Claude Code helper: blinking session tabs, notification sounds for the right VS Code window, Claude.ai usage limits in the status bar, and rainbow-colored CSV columns",
+  "description": "Claude Code helper: blinking session tabs, notification sounds for the right VS Code window, and rainbow-colored CSV columns",
   "version": "0.3.0",
   "author": "Tomas Janu",
   "publisher": "tomasjanu",
@@ -24,14 +24,6 @@
         "title": "Jean Claude: Turn Features On/Off"
       },
       {
-        "command": "jeanClaude.refresh",
-        "title": "Jean Claude: Refresh"
-      },
-      {
-        "command": "jeanClaude.setSessionKey",
-        "title": "Jean Claude: Set Session Key"
-      },
-      {
         "command": "jeanClaude.setupNotifications",
         "title": "Jean Claude: Setup Notifications"
       }
@@ -39,33 +31,6 @@
     "configuration": {
       "title": "Jean Claude",
       "properties": {
-        "jeanClaude.usageMonitor.enabled": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Enable the usage monitor that displays Claude.ai usage limits in the status bar.\n\n⚠️ **Billing notice (April 2026):** This feature calls the Anthropic API using your OAuth token or session cookie. Under the new billing policy, third-party API access is no longer covered by your Claude subscription and may incur extra usage charges. [Learn more](https://claude.ai).\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
-        },
-        "jeanClaude.authMethod": {
-          "type": "string",
-          "default": "auto",
-          "enum": ["auto", "cookie"],
-          "enumDescriptions": [
-            "Auto-detect OAuth token from Claude Code credentials, fall back to session cookie",
-            "Use session cookie from browser"
-          ],
-          "description": "Authentication method for fetching usage data"
-        },
-        "jeanClaude.sessionKey": {
-          "type": "string",
-          "default": "",
-          "description": "Session key cookie from claude.ai (required if authMethod is 'cookie')"
-        },
-        "jeanClaude.refreshInterval": {
-          "type": "number",
-          "default": 5,
-          "minimum": 1,
-          "maximum": 60,
-          "description": "Refresh interval in minutes"
-        },
         "jeanClaude.blinkingTabs.enabled": {
           "type": "boolean",
           "default": true,
@@ -109,18 +74,6 @@
           "markdownDescription": "Color each column of CSV and TSV files (`.csv`, `.tsv`, `.tab`) in its own color, so the columns are easy to follow. The delimiter (`,` `;` tab `|`) is detected automatically, and quoted fields (including ones spanning several lines) are respected.\n\nYou can also turn this on or off by clicking **Jean Claude** in the status bar."
         }
       }
-    },
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "jeanClaude.refresh",
-          "when": "config.jeanClaude.usageMonitor.enabled"
-        },
-        {
-          "command": "jeanClaude.setSessionKey",
-          "when": "config.jeanClaude.usageMonitor.enabled"
-        }
-      ]
     }
   },
   "scripts": {

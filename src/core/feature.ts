@@ -17,7 +17,7 @@ export interface Feature {
   readonly description: string;
   /**
    * Other settings (relative to `jeanClaude.`) that restart the feature when
-   * they change while it is on, e.g. ["refreshInterval"].
+   * they change while it is on, e.g. ["myFeature.interval"].
    */
   readonly restartOn?: string[];
 

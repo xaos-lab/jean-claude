@@ -1,8 +1,6 @@
 # Jean Claude - VS Code Extension
 
-Makes it obvious which Claude Code session needs you: the session's tab blinks, and a sound, a Windows notification and a taskbar flash point you to the right VS Code window. Optionally shows your Claude.ai usage limits in the status bar. As a bonus, it colors the columns of CSV files.
-
-![Status bar example](https://img.shields.io/badge/☁_Claude:_5h_12%25_|_7d_35%25-blue?style=flat-square)
+Makes it obvious which Claude Code session needs you: the session's tab blinks, and a sound, a Windows notification and a taskbar flash point you to the right VS Code window. As a bonus, it colors the columns of CSV files.
 
 ## Features
 
@@ -12,19 +10,7 @@ Every feature can be turned on or off on its own. Click **Jean Claude** in the s
 |---------|---------|
 | Blinking session tabs | on |
 | Notifications | off |
-| Usage monitor | off |
 | Rainbow CSV | on |
-
-### Usage Monitor
-- **Disabled by default** — turn it on in the Jean Claude menu or in settings
-- Shown as its own item next to **Jean Claude** in the status bar; click it to refresh
-- **5h** - current 5-hour session usage (%)
-- **7d** - weekly usage across all models (%)
-- Color coding: green (<50%), yellow (50-80%), red (>80%)
-- Tooltip with detailed breakdown (Sonnet, Opus, reset times)
-- Automatic OAuth token refresh when expired (via Claude Code CLI)
-
-> **⚠️ Billing notice (April 2026):** The usage monitor calls the Anthropic API using your OAuth token or session cookie. Under the [new billing policy](https://claude.ai), third-party API access is no longer covered by your Claude subscription and may incur extra usage charges. Enable at your own discretion.
 
 ### Blinking session tabs
 - The Claude Code extension already puts a dot on the icon of the exact session tab that needs you: **blue** = waiting for your answer or permission, **orange** = finished and not seen yet
@@ -105,22 +91,7 @@ After making changes, run `npm run compile` and reload VS Code.
 
 ## Setup
 
-### 1. Authentication (usage monitor)
-
-**If you have Claude Code installed** — nothing to do. The extension automatically reads the OAuth token from `~/.claude/.credentials.json` and refreshes it when expired.
-
-**If automatic detection doesn't work** — set the session cookie manually:
-
-1. Open https://claude.ai and log in
-2. DevTools (`F12`) → **Application** → **Cookies** → `https://claude.ai`
-3. Copy the `sessionKey` value (starts with `sk-ant-sid01-...`)
-4. Either:
-   - `Ctrl+Shift+P` → **"Jean Claude: Set Session Key"** → paste
-   - Or add to `settings.json`: `"jeanClaude.sessionKey": "sk-ant-sid01-..."`
-
-> **Note:** The session cookie expires periodically. OAuth (automatic) is preferred.
-
-### 2. Notification sounds (optional)
+### Notification sounds (optional)
 
 Plays a sound when Claude Code asks a question or finishes a task.
 
@@ -176,10 +147,6 @@ Open Settings (`Ctrl+,`) and search for "Jean Claude":
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `jeanClaude.usageMonitor.enabled` | `false` | Enable usage monitor (⚠️ calls Anthropic API, may incur extra charges) |
-| `jeanClaude.authMethod` | `auto` | `auto` = OAuth + fallback to cookie, `cookie` = cookie only |
-| `jeanClaude.sessionKey` | (empty) | Session cookie from browser |
-| `jeanClaude.refreshInterval` | `5` | Data refresh interval in minutes (1-60) |
 | `jeanClaude.blinkingTabs.enabled` | `true` | Make the blue/orange dot on Claude Code session tabs blink |
 | `jeanClaude.notificationSound.enabled` | `false` | Enable notification sounds (only for sessions of this window) |
 | `jeanClaude.notificationSound.sound` | `icq` | Which sound to play (`icq` or `pop`) |
@@ -194,8 +161,6 @@ Open Settings (`Ctrl+,`) and search for "Jean Claude":
 Open Command Palette (`Ctrl+Shift+P`):
 
 - **Jean Claude: Turn Features On/Off** - the same checkbox menu as clicking **Jean Claude** in the status bar
-- **Jean Claude: Refresh** - manually refresh usage data (only while the usage monitor is on)
-- **Jean Claude: Set Session Key** - set session cookie (only while the usage monitor is on)
 - **Jean Claude: Setup Notifications** - enable notification sounds and add hooks to `~/.claude/settings.json`
 
 ## Development
@@ -215,7 +180,6 @@ jean-claude/
 │   │   ├── index.ts              # List of all features (register new ones here)
 │   │   ├── blinkingTabs/         # Blink animation in Claude Code's tab icons
 │   │   ├── notificationSound/    # Sound, Windows notification, taskbar flash
-│   │   ├── usageMonitor/         # API client + usage status bar item
 │   │   └── rainbowCsv/           # CSV parser + column colors (editor decorations)
 │   └── uninstall.ts              # Cleanup when the extension is uninstalled
 ├── out/                          # Compiled JavaScript (generated)
